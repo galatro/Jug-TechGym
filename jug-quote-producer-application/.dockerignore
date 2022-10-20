@@ -1,0 +1,6 @@
+.README.md
+mvnw.cmd
+.gitignore
+Containerfile
+target
+.vscode

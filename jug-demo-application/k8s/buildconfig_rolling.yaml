@@ -1,0 +1,27 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: jug-demo-application
+  labels:
+    app: jug-demo-application
+    app.openshift.io/runtime: quarkus
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: jug-demo-application:latest
+  strategy:
+    type: Docker
+    dockerStrategy:
+      dockerfilePath: Containerfile.jvm
+  source:
+    type: Git
+    git:
+      uri: 'https://github.ibm.com/jug-techgym-session-1/jug-demo-application.git'
+    sourceSecret:
+      name: git-credentials
+  triggers:
+    - type: Generic
+      generic:
+        secretReference:
+          name: jug-demo-application-webhook-secret

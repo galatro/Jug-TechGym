@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jug-demo-application
+  annotations:
+     app.openshift.io/vcs-uri: "https://github.ibm.com/jug-techgym-session-1/jug-demo-application.git"
+     image.openshift.io/triggers: >-
+      [{"from":{"kind":"ImageStreamTag","name":"jug-demo-application:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"jug-demo-application\")].image"}]
+  labels:
+    app.openshift.io/runtime: quarkus
+    app: jug-demo-application
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: jug-demo-application
+  template:
+    metadata:
+      labels:
+        app.openshift.io/runtime: quarkus
+        app: jug-demo-application
+    spec:
+      containers:
+        - name: jug-demo-application
+          image: image-registry.openshift-image-registry.svc:5000/esercizio-1/jug-demo-application:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          resources: 
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 3
+            timeoutSeconds: 5
+            periodSeconds: 1
+            successThreshold: 1
+            failureThreshold: 2
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 3
+            timeoutSeconds: 5
+            periodSeconds: 1
+            successThreshold: 1
+            failureThreshold: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
